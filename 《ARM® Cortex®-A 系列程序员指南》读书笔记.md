@@ -29,7 +29,7 @@ ARM架构诞生于1985年，并还在不停的演变进化中。ARM内核的每�
 
 ARMv8-A是面向应用领域的最新一代ARM架构。其包括32位和64位两种运行模式，在引入了64位运算能力与寄存器的同时可以向后兼容ARMv7架构软件。
 
-![ARM架构的发展](1.png)
+![ARM架构的发展](pictures/1.png)
 
 ARMv8-A引入了多项改进，从而使开发者可以设计出更高性能的处理器。
 
@@ -57,7 +57,7 @@ ARMv8具有4个异常等级（*Exception levels*）。在AArch64中，异常等�
 |   EL2    |          Hypervisor          |
 |   EL3    | 底层固件，包括Secure Monitor |
 
-![软件层级](2.png)
+![软件层级](pictures/2.png)
 
 通常情况下，应用软件、操作系统内核、hypervisor分别占据一个异常等级，而内核中的hypervisor可以跨EL2和EL1运行，例如KVM。
 
@@ -71,17 +71,17 @@ ARMv8-A架构定义了AArch64和AArch32两种运行状态。AArch32保留了ARMv
 
 AArch64和AArch32的异常等级结构图如下所示，需要注意的是，可信OS在AArch32状态时运行在==“Secure EL3”==，在AArch64时运行在“Secure EL1”[^2]。
 
-![AArch64的异常等级](3.png)
+![AArch64的异常等级](pictures/3.png)
 
-![AArch32的异常等级](4.png)
+![AArch32的异常等级](pictures/4.png)
 
 ### 3.2 异常等级的改变
 
 在ARMv7架构中，处理器的模式（*mode*）可通过软件在特权模式下改变或在发生异常时自动改变。ARMv7处理器的模式如下图所示：
 
-![ARMv7处理器模式](5.png)
+![ARMv7处理器模式](pictures/5.png)
 
-![ARMv7权限等级](6.png)
+![ARMv7权限等级](pictures/6.png)
 
 异常等级的变化需要遵守以下规则：
 
@@ -102,7 +102,7 @@ AArch64和AArch32的异常等级结构图如下所示，需要注意的是，可
 
 有时切换运行状态是必要的。例如，系统运行的是64位操作系统，而想在EL0上运行32位的应用程序。此时就需要将系统切换到AArch32状态，当程序运行结束或需要返回操作系统执行时，系统可切换回AArch64。需要注意的是，以AArch32状态运行的操作系统上不能运行64位的应用程序。如下图所示：
 
-![AArch32与AArch64的切换](7.png)
+![AArch32与AArch64的切换](pictures/7.png)
 
 要在同异常等级上切换运行状态，必须先切换到更高的异常等级，再返回原异常等级。例如，在64位操作系统上运行32位和64位应用程序，32位程序可通过SVC指令或中断切换到AArch64 EL1，然后操作系统可以进行任务切换并返回到AArch64 EL0运行。实际上这也意味着无法将32位和64位程序混用，因为它们之间无法进行直接调用。
 
@@ -124,7 +124,7 @@ AArch64和AArch32的异常等级结构图如下所示，需要注意的是，可
 
 AArch64提供了31个64位通用寄存器X0-X30，可在所有异常等级随时访问。这些寄存器还有32位格式，称为W0-W31，对应64位寄存器的低32位。
 
-![寄存器格式](8.png)
+![寄存器格式](pictures/8.png)
 
 读取W*n*寄存器时忽略X*n*的高32位；写W*n*寄存器时将X*n*的高32位置0，例如写W0写入0xFFFFFFFF后，X0的值为0x00000000FFFFFFFF。
 
@@ -132,7 +132,7 @@ AArch64提供了31个64位通用寄存器X0-X30，可在所有异常等级随时
 
 除了31个通用处理器外，AArch64还有一系列的特殊寄存器，如下如所示：
 
-![AArch64的特殊寄存器](9.png)
+![AArch64的特殊寄存器](pictures/9.png)
 
 #### 4.1.1 Zero寄存
 
@@ -160,7 +160,7 @@ AArch64提供了31个64位通用寄存器X0-X30，可在所有异常等级随时
 
 产生异常时，处理器的状态（PSTATE）保存在对应的SPSR_EL*n*寄存器中；异常返回时SPSR中的值会恢复到PSTATE中。发生异常时处理器进入EL*n*，则PSTATE保存在SPSR_EL*n*中。
 
-![SPSR寄存器](10.png)
+![SPSR寄存器](pictures/10.png)
 
 ### 4.2 处理器状态
 
@@ -168,7 +168,7 @@ AArch64提供了31个64位通用寄存器X0-X30，可在所有异常等级随时
 
 在AArch64状态下使用ERET指令从异常返回时，SPSR_EL*n*将会拷贝到PSTATE中，且处理器会从ELR_EL*n*处开始执行。在EL0中只能访问PSTATE的N，Z，C，V字段，其他字段只能在EL1或更高异常等级中访问。
 
-![PSTATE字段定义](11.png)
+![PSTATE字段定义](pictures/11.png)
 
 ### 4.3 系统寄存器
 
@@ -217,13 +217,29 @@ MSR SCTLR_EL1, X0      //SCTLR_EL1 = X0
 
 AArch32与ARMv7架构几乎相同，使用的寄存器模型也与ARMv7一致。ARMv7有R0-R15共16个通用寄存器，其中R13作为SP使用，R14作为LR使用，R15作为PC使用。软件可以访问CPSR寄存器，产生异常时CPSR的值会保存在处理该异常的模式的SPSR_*mode*寄存器中。每个模式都有数个影子寄存器，因此处理器所处的模式决定了软件可以访问哪些寄存器。
 
-![ARMv7寄存器](12.png)
+![ARMv7寄存器](pictures/12.png)
 
-AArch32的大部分寄存器其实都映射在AArch64的寄存器上。映射关系如下图所示：
+AArch32的大部分寄存器其实都映射在AArch64的寄存器上。AArch32下不能访问AArch64寄存器的高32位，及相当于使用W*n*寄存器。映射关系如下图所示：
 
-![AArch64寄存器在AArch32中的映射](13.png)
+![AArch64寄存器在AArch32中的映射](pictures/13.png)
 
+注意，上图中的“Inaccessible from AArch64”指的是这SPSR_fiq、SPSR_irq、SPSR_abt、SPSR_und这四个寄存器是AArch32独有的，未映射到AArch64中，只有EL1运行在AArch32状态下才能访问，如果EL1以AArch64状态运行，FIQ、IRQ等处理器模式相当于没有实现，因此无法访问。更多详细信息请查询ARMv8架构手册的G1.6.1和G1.9.1章节。
 
+PS：此处有一个疑问，如果EL3为AArch32，那么安全态没有EL1，只有EL0和EL3，SVC、IRQ等模式都在EL3实现。此时SVC模式下的SPSR寄存器是否还是映射到SPSR_EL1？
+
+SPSR_svc映射到SPSR_EL1，SPSR_hyp映射到SPSR_EL2，ELR_hyp映射到ELR_EL2。
+
+当异常是在AArch32中产生，进入AArch64中处理，则ELR_EL*n*的高32位为0。
+
+#### 4.5.2 AArch32中的PSTATE
+
+AArch64，PSTATE由数个可独立访问的寄存器组合成为；AArch32中存在与ARMv7 CPSR对应的额外字段。PS：CPSR的访问方式与ARMv7相同。
+
+### 4.6 NEON与浮点寄存器
+
+略
+
+## 5.ARMv8指令集简介
 
 
 
